@@ -1,0 +1,6 @@
+{
+  "name": "Ollaria Ateliê - Gestão e Portal do Aluno",
+  "description": "Sistema de controle de ateliê de cerâmica com gestão de presença, queimas, mensalidades, acompanhamento de peças e portais restritos para ateliê e alunos.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
