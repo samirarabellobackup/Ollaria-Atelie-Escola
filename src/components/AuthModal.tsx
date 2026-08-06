@@ -36,7 +36,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [selectedStudentId, setSelectedStudentId] = useState<string>(students[0]?.id || '');
   const [studentEmailInput, setStudentEmailInput] = useState('');
   const [studentPasswordInput, setStudentPasswordInput] = useState('');
-  const [showDemoPasswords, setShowDemoPasswords] = useState(false);
   const [studentError, setStudentError] = useState<string | null>(null);
 
   if (!isOpen) return null;
@@ -256,30 +255,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     className="w-full pl-9 pr-3 py-2.5 bg-white border border-stone-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-600 focus:border-amber-600 outline-none transition"
                   />
                 </div>
-              </div>
-
-              {/* Demo passwords helper button */}
-              <div className="pt-1">
-                <button
-                  type="button"
-                  onClick={() => setShowDemoPasswords(!showDemoPasswords)}
-                  className="text-[11px] text-amber-800 hover:text-amber-900 font-semibold underline flex items-center space-x-1"
-                >
-                  <Sparkles className="w-3 h-3 text-amber-600" />
-                  <span>{showDemoPasswords ? 'Ocultar senhas dos alunos de demonstração' : 'Ver senhas de teste dos alunos'}</span>
-                </button>
-
-                {showDemoPasswords && (
-                  <div className="mt-2 p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-900 space-y-1">
-                    <p className="font-bold text-[11px] uppercase tracking-wider text-amber-900">Senhas de Exemplo Cadastradas:</p>
-                    {students.slice(0, 4).map((s) => (
-                      <div key={s.id} className="flex justify-between items-center text-[11px]">
-                        <span className="font-medium text-stone-800">{s.name.split(' ')[0]}:</span>
-                        <code className="bg-amber-100 px-1.5 py-0.5 rounded text-amber-950 font-mono font-bold">{s.password || generateStudentPassword(s.name)}</code>
-                      </div>
-                    ))}
-                  </div>
-                )}
               </div>
 
               <button
