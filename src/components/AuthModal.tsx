@@ -36,6 +36,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [selectedStudentId, setSelectedStudentId] = useState<string>(students[0]?.id || '');
   const [studentEmailInput, setStudentEmailInput] = useState('');
   const [studentPasswordInput, setStudentPasswordInput] = useState('');
+  const [showDemoPasswords, setShowDemoPasswords] = useState(false);
   const [studentError, setStudentError] = useState<string | null>(null);
 
   if (!isOpen) return null;
@@ -93,26 +94,49 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       <div className="bg-stone-50 border border-stone-200 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in duration-200">
         
         {/* Header Tabs */}
-        <div className="bg-stone-900 text-stone-100 p-6 pb-5 relative">
+        <div className="bg-stone-900 text-stone-100 p-6 pb-4 relative">
           <button
             onClick={onClose}
             className="absolute top-4 right-4 text-stone-400 hover:text-stone-100 text-lg font-bold p-1 rounded-lg"
           >
             ✕
           </button>
-          
-          <div className="flex items-center space-x-2 mb-2">
-            <span className="text-xs uppercase font-semibold px-2 py-0.5 rounded bg-amber-900/80 text-amber-300 border border-amber-700/60">
-              {activeTab === 'admin' ? 'Área Privada Ateliê' : 'Portal do Aluno'}
-            </span>
+
+          {/* Switcher Tabs */}
+          <div className="flex bg-stone-800 p-1 rounded-xl mb-4 text-xs font-bold border border-stone-700">
+            <button
+              type="button"
+              onClick={() => setActiveTab('admin')}
+              className={`flex-1 py-2 rounded-lg transition flex items-center justify-center space-x-1.5 ${
+                activeTab === 'admin'
+                  ? 'bg-amber-500 text-amber-950 shadow-md font-extrabold'
+                  : 'text-stone-300 hover:text-white'
+              }`}
+            >
+              <Building2 className="w-4 h-4" />
+              <span>Painel Admin</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('student')}
+              className={`flex-1 py-2 rounded-lg transition flex items-center justify-center space-x-1.5 ${
+                activeTab === 'student'
+                  ? 'bg-amber-500 text-amber-950 shadow-md font-extrabold'
+                  : 'text-stone-300 hover:text-white'
+              }`}
+            >
+              <User className="w-4 h-4" />
+              <span>Portal do Aluno</span>
+            </button>
           </div>
-          <h2 className="text-2xl font-serif font-bold text-amber-100">
-            {activeTab === 'admin' ? 'Acesso Administrativo' : 'Ollaria Ateliê'}
+          
+          <h2 className="text-xl font-serif font-bold text-amber-100">
+            {activeTab === 'admin' ? 'Acesso Administrativo do Ateliê' : 'Acesso ao Portal do Aluno'}
           </h2>
-          <p className="text-xs text-stone-300 mt-1">
+          <p className="text-xs text-stone-300 mt-0.5">
             {activeTab === 'admin'
-              ? 'Autenticação restrita para gestão do ateliê.'
-              : 'Selecione seu perfil de aluno para acessar seus dados.'}
+              ? 'Gestão irrestrita de alunos, turmas, forno e financeiro.'
+              : 'Selecione seu perfil de aluno para consultar seus dados.'}
           </p>
         </div>
 
@@ -125,7 +149,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <div>
                   <p className="font-semibold">Acesso Administrativo Restrito</p>
                   <p className="text-[11px] text-amber-800/90 mt-0.5">
-                    Requer login cadastrado e autenticação em duas etapas (2FA).
+                    Digite suas credenciais registradas do ateliê para entrar no painel de controle.
                   </p>
                 </div>
               </div>

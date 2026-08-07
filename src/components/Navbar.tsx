@@ -45,61 +45,93 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
 
         {/* Right Section Actions & User Badges */}
-        <div className="flex items-center space-x-2 sm:space-x-4">
+        <div className="flex items-center space-x-2 sm:space-x-3">
           {currentRole === 'admin' && isAdmin2FAVerified && (
-            <>
-              <button
-                onClick={onOpenGoogleFormsModal}
-                className="hidden md:flex items-center space-x-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-emerald-900/60 hover:bg-emerald-800 text-emerald-200 border border-emerald-700/50 transition-all shadow-sm"
-                title="Importar respostas de formulário Google Forms"
-              >
-                <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
-                <span>Google Forms</span>
-              </button>
-            </>
+            <button
+              onClick={onOpenGoogleFormsModal}
+              className="hidden md:flex items-center space-x-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-emerald-900/60 hover:bg-emerald-800 text-emerald-200 border border-emerald-700/50 transition-all shadow-sm"
+              title="Importar respostas de formulário Google Forms"
+            >
+              <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
+              <span>Google Forms</span>
+            </button>
           )}
 
-          {/* Active Role Status */}
+          {/* Active Role Status & Switch Controls */}
           {currentRole === 'admin' ? (
-            <div className="flex items-center space-x-2 bg-amber-900/70 border border-amber-700/60 px-3 py-1.5 rounded-lg text-xs">
-              <Building2 className="w-4 h-4 text-amber-400" />
+            <div className="flex items-center space-x-2 bg-amber-900/90 border border-amber-600/80 px-3 py-1.5 rounded-xl text-xs shadow-md">
+              <Building2 className="w-4.5 h-4.5 text-amber-300 shrink-0" />
               <div className="flex flex-col">
-                <span className="font-semibold text-amber-200">Painel do Ateliê</span>
+                <span className="font-bold text-amber-100">Painel do Ateliê (Admin)</span>
                 {isAdmin2FAVerified ? (
-                  <span className="text-[10px] text-emerald-400 flex items-center gap-0.5">
-                    <ShieldCheck className="w-3 h-3" /> 2FA Autenticado
+                  <span className="text-[10px] text-emerald-300 font-medium flex items-center gap-0.5">
+                    <ShieldCheck className="w-3 h-3 text-emerald-400" /> 2FA Verificado
                   </span>
                 ) : (
-                  <span className="text-[10px] text-amber-400 flex items-center gap-0.5">
+                  <span className="text-[10px] text-amber-300 flex items-center gap-0.5">
                     <Lock className="w-3 h-3" /> Requer 2FA
                   </span>
                 )}
               </div>
             </div>
           ) : currentRole === 'student' && activeStudent ? (
-            <div className="flex items-center space-x-2.5 bg-orange-950/80 border border-orange-800/60 px-3 py-1.5 rounded-lg text-xs">
-              {activeStudent.avatarUrl ? (
-                <img
-                  src={activeStudent.avatarUrl}
-                  alt={activeStudent.name}
-                  className="w-7 h-7 rounded-full object-cover border border-amber-400/40"
-                />
-              ) : (
-                <div className="w-7 h-7 rounded-full bg-amber-800 flex items-center justify-center text-amber-200 font-bold">
-                  {activeStudent.name.charAt(0)}
+            <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 bg-orange-950/80 border border-orange-800/60 px-2.5 py-1.5 rounded-lg text-xs">
+                {activeStudent.avatarUrl ? (
+                  <img
+                    src={activeStudent.avatarUrl}
+                    alt={activeStudent.name}
+                    className="w-6 h-6 rounded-full object-cover border border-amber-400/40"
+                  />
+                ) : (
+                  <div className="w-6 h-6 rounded-full bg-amber-800 flex items-center justify-center text-amber-200 font-bold text-[10px]">
+                    {activeStudent.name.charAt(0)}
+                  </div>
+                )}
+                <div className="flex flex-col text-left">
+                  <span className="font-semibold text-amber-100 line-clamp-1 max-w-[100px] sm:max-w-[140px]">
+                    {activeStudent.name}
+                  </span>
+                  <span className="text-[9px] text-amber-300/80">Portal do Aluno</span>
                 </div>
-              )}
-              <div className="flex flex-col text-left">
-                <span className="font-semibold text-amber-100 line-clamp-1 max-w-[120px] sm:max-w-[180px]">
-                  {activeStudent.name}
-                </span>
-                <span className="text-[10px] text-amber-300/80">Portal do Aluno</span>
               </div>
+
+              {/* Prominent Admin Access Button even when logged in as Student */}
+              <button
+                onClick={() => onOpenAuth('admin')}
+                className="px-2.5 py-1.5 text-xs font-bold rounded-xl bg-amber-500 hover:bg-amber-400 text-amber-950 shadow-md border border-amber-300 transition-all flex items-center space-x-1.5"
+                title="Acessar o Painel Administrativo do Ateliê"
+              >
+                <Building2 className="w-3.5 h-3.5 text-amber-950" />
+                <span className="hidden sm:inline">Acesso Admin</span>
+              </button>
             </div>
           ) : null}
 
-          {/* Auth Button Controls */}
-          {currentRole ? (
+          {/* Auth Button Controls when Logged Out */}
+          {!currentRole && (
+            <div className="flex items-center space-x-2">
+              {/* Highlighted Admin Access Button */}
+              <button
+                onClick={() => onOpenAuth('admin')}
+                className="px-3 py-1.5 text-xs sm:text-xs font-bold rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-amber-400 text-amber-950 hover:brightness-110 shadow-lg border border-amber-200 transition-all flex items-center space-x-1.5"
+                title="Painel Administrativo do Ateliê"
+              >
+                <Building2 className="w-4 h-4 text-amber-950" />
+                <span>Acesso Administrativo</span>
+              </button>
+
+              <button
+                onClick={() => onOpenAuth('student')}
+                className="px-3 py-1.5 text-xs font-semibold rounded-xl bg-amber-900/80 hover:bg-amber-800 text-amber-100 border border-amber-700/60 transition-all flex items-center space-x-1"
+              >
+                <User className="w-3.5 h-3.5 text-amber-300" />
+                <span className="hidden sm:inline">Portal do Aluno</span>
+              </button>
+            </div>
+          )}
+
+          {currentRole && (
             <button
               onClick={onLogout}
               className="p-2 text-amber-300 hover:text-amber-100 hover:bg-amber-900/60 rounded-lg border border-transparent hover:border-amber-700/50 transition-colors"
@@ -107,24 +139,14 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
-          ) : (
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={() => onOpenAuth('student')}
-                className="px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg bg-gradient-to-r from-amber-700 to-orange-700 hover:from-amber-600 hover:to-orange-600 text-white shadow-sm border border-amber-600/40 transition-all flex items-center space-x-1.5"
-              >
-                <User className="w-4 h-4 text-amber-200" />
-                <span>Portal do Aluno</span>
-              </button>
-            </div>
           )}
 
           <button
             onClick={onResetDemoData}
-            className="text-[10px] text-amber-400/60 hover:text-amber-300 underline hidden lg:block ml-2"
+            className="text-[10px] text-amber-400/60 hover:text-amber-300 underline hidden xl:block ml-1"
             title="Reiniciar dados padrão do ateliê"
           >
-            Resetar Dados
+            Resetar
           </button>
         </div>
       </div>

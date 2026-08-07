@@ -204,52 +204,93 @@ export default function App() {
         
         {/* LANDING / LOGGED OUT HERO CHOICE */}
         {!currentRole ? (
-          <div className="py-8 sm:py-16 space-y-8">
-            <div className="text-center max-w-3xl mx-auto space-y-4">
-              <div className="inline-flex items-center space-x-2 bg-amber-200/80 text-amber-950 px-3 py-1 rounded-full text-xs font-bold border border-amber-300">
+          <div className="py-6 sm:py-12 space-y-8">
+            <div className="text-center max-w-3xl mx-auto space-y-3">
+              <div className="inline-flex items-center space-x-2 bg-amber-200/80 text-amber-950 px-3 py-1 rounded-full text-xs font-bold border border-amber-300 shadow-sm">
                 <span>🏺 Ollaria Ateliê de Cerâmica</span>
               </div>
               <h1 className="text-3xl sm:text-5xl font-serif font-bold text-stone-900 tracking-tight">
-                Portal do Aluno • Ollaria Ateliê
+                Sistema de Gestão & Portal do Aluno
               </h1>
-              <p className="text-stone-600 text-sm sm:text-base leading-relaxed">
-                Acompanhe o saldo das suas aulas no mês, o andamento das suas peças na secagem e forno, taxas de queima e avisos do ateliê.
+              <p className="text-stone-600 text-sm sm:text-base leading-relaxed max-w-2xl mx-auto">
+                Selecione abaixo como deseja acessar a plataforma do ateliê.
               </p>
             </div>
 
-            {/* Student Portal Entrance Card */}
-            <div className="max-w-xl mx-auto pt-4">
+            {/* Two Portal Entrance Cards Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto pt-2">
+              
+              {/* Card 1: Administrative Panel */}
+              <div
+                onClick={() => handleOpenAuth('admin')}
+                className="bg-stone-900 text-stone-100 p-8 rounded-3xl border-2 border-amber-600/80 shadow-xl hover:shadow-2xl hover:border-amber-400 transition cursor-pointer group flex flex-col justify-between relative overflow-hidden"
+              >
+                <div className="absolute top-0 right-0 bg-amber-500 text-amber-950 font-bold text-[10px] uppercase px-3 py-1 rounded-bl-xl tracking-wider">
+                  Acesso Total do Ateliê
+                </div>
+
+                <div>
+                  <div className="w-14 h-14 rounded-2xl bg-amber-950 text-amber-300 border border-amber-700/80 flex items-center justify-center mb-6 group-hover:scale-110 transition shadow-inner">
+                    <ShieldCheck className="w-8 h-8 text-amber-400" />
+                  </div>
+                  <span className="text-xs uppercase font-mono font-bold text-amber-400 tracking-wider">
+                    Administração do Ateliê
+                  </span>
+                  <h3 className="text-2xl font-serif font-bold text-white mt-1">
+                    Painel de Controle Geral
+                  </h3>
+                  <p className="text-xs text-stone-300 mt-2 leading-relaxed">
+                    Acesso completo e irrestrito para gestão administrativa, controle total de alunos, frequências, forno e finanças.
+                  </p>
+
+                  <ul className="mt-6 space-y-2.5 text-xs text-stone-200 border-t border-stone-800 pt-4">
+                    <li className="flex items-center gap-2">✓ <b>Visualização Completa</b> de todos os alunos cadastrados</li>
+                    <li className="flex items-center gap-2">✓ Chamada diária, reposição e histórico de faltas</li>
+                    <li className="flex items-center gap-2">✓ Controle do Forno: biscoito, esmalte e queimas à pagar</li>
+                    <li className="flex items-center gap-2">✓ Financeiro completo e mensalidades do ateliê</li>
+                    <li className="flex items-center gap-2">✓ Importador de respostas de formulários (Google Forms)</li>
+                  </ul>
+                </div>
+
+                <div className="mt-8 pt-5 border-t border-stone-800 flex items-center justify-between">
+                  <span className="text-sm font-bold text-amber-400 group-hover:underline">Acessar Painel de Controle (Admin) →</span>
+                  <Lock className="w-5 h-5 text-amber-500" />
+                </div>
+              </div>
+
+              {/* Card 2: Student Portal Entrance */}
               <div
                 onClick={() => handleOpenAuth('student')}
-                className="bg-white text-stone-900 p-8 sm:p-10 rounded-3xl border border-stone-200 shadow-xl hover:shadow-2xl hover:border-amber-500/80 transition cursor-pointer group flex flex-col justify-between"
+                className="bg-white text-stone-900 p-8 rounded-3xl border border-stone-200 shadow-xl hover:shadow-2xl hover:border-amber-500/80 transition cursor-pointer group flex flex-col justify-between"
               >
                 <div>
                   <div className="w-14 h-14 rounded-2xl bg-amber-100 text-amber-900 flex items-center justify-center mb-6 group-hover:scale-110 transition shadow-inner">
                     <Users className="w-8 h-8 text-amber-900" />
                   </div>
                   <span className="text-xs uppercase font-mono font-semibold text-amber-800">
-                    Área Exclusiva
+                    Área do Aluno
                   </span>
                   <h3 className="text-2xl font-serif font-bold text-stone-900 mt-1">
-                    Entrar no Portal do Aluno
+                    Portal do Aluno
                   </h3>
                   <p className="text-xs text-stone-500 mt-2 leading-relaxed">
-                    Acesse seu perfil de aluno para consultar suas frequências, mensalidades e estado de queima das suas cerâmicas.
+                    Acesso individual do aluno para consultar seus próprios dados da ficha, aulas do mês, faltas e queimas à pagar.
                   </p>
 
-                  <ul className="mt-6 space-y-2.5 text-xs text-stone-700">
-                    <li className="flex items-center gap-2">✓ Saldo e histórico de aulas do mês</li>
-                    <li className="flex items-center gap-2">✓ Acompanhamento de peças em modelagem, biscoito e esmalte</li>
-                    <li className="flex items-center gap-2">✓ Extrato de taxas de queima (R$/kg)</li>
-                    <li className="flex items-center gap-2">✓ Chave Pix e avisos gerais do ateliê</li>
+                  <ul className="mt-6 space-y-2.5 text-xs text-stone-700 border-t border-stone-100 pt-4">
+                    <li className="flex items-center gap-2">✓ Ficha de matrícula com dados preenchidos no formulário</li>
+                    <li className="flex items-center gap-2">✓ Aulas realizadas, agendadas e faltas do mês</li>
+                    <li className="flex items-center gap-2">✓ Status das peças em modelagem, secagem e forno</li>
+                    <li className="flex items-center gap-2">✓ Vencimento de mensalidade e extrato de queimas</li>
                   </ul>
                 </div>
 
                 <div className="mt-8 pt-5 border-t border-stone-100 flex items-center justify-between">
-                  <span className="text-sm font-bold text-amber-900 group-hover:underline">Acessar Meu Perfil de Aluno →</span>
+                  <span className="text-sm font-bold text-amber-900 group-hover:underline">Acessar Perfil do Aluno →</span>
                   <Users className="w-5 h-5 text-stone-400" />
                 </div>
               </div>
+
             </div>
           </div>
         ) : currentRole === 'admin' ? (
@@ -407,6 +448,7 @@ export default function App() {
         isOpen={isGoogleFormsModalOpen}
         onClose={() => setIsGoogleFormsModalOpen(false)}
         onStudentEnrolled={handleStudentEnrolled}
+        existingStudents={students}
       />
 
       <StudentDetailModal

@@ -47,6 +47,19 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
 
   return (
     <div className="space-y-6">
+      {/* Admin Notice Banner for quick context */}
+      <div className="bg-amber-100 border border-amber-300 text-amber-950 p-3.5 rounded-2xl shadow-sm text-xs flex flex-col sm:flex-row items-center justify-between gap-2">
+        <div className="flex items-center space-x-2">
+          <Info className="w-4 h-4 text-amber-800 shrink-0" />
+          <span>
+            <b>Portal do Aluno Ativo:</b> Exibindo dados de <b className="text-amber-900">{student.name}</b>. Para visualizar o ateliê completo, acesse o <b>Painel Administrativo</b>.
+          </span>
+        </div>
+        <span className="text-[10px] bg-amber-200 text-amber-900 px-2 py-0.5 rounded font-mono font-bold shrink-0">
+          Ateliê Ollaria
+        </span>
+      </div>
+
       {/* Welcome Banner */}
       <div className="bg-gradient-to-r from-amber-900 via-stone-900 to-amber-950 text-amber-50 rounded-2xl p-6 sm:p-8 shadow-xl border border-amber-800/40 relative overflow-hidden">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative z-10">
