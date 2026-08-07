@@ -22,21 +22,27 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<UserRole>(initialRole);
 
-  // Sync activeTab when initialRole changes
+  // Sync activeTab and reset input fields when modal opens or role changes
   React.useEffect(() => {
     setActiveTab(initialRole);
+    setAdminEmail('');
+    setAdminPassword('');
+    setAdminError(null);
+    setSelectedStudentId('');
+    setStudentEmailInput('');
+    setStudentPasswordInput('');
+    setStudentError(null);
   }, [initialRole, isOpen]);
   
   // Admin form state
-  const [adminEmail, setAdminEmail] = useState('ollariaatelie@gmail.com');
-  const [adminPassword, setAdminPassword] = useState('admin2026');
+  const [adminEmail, setAdminEmail] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
   const [adminError, setAdminError] = useState<string | null>(null);
 
   // Student form state
-  const [selectedStudentId, setSelectedStudentId] = useState<string>(students[0]?.id || '');
+  const [selectedStudentId, setSelectedStudentId] = useState<string>('');
   const [studentEmailInput, setStudentEmailInput] = useState('');
   const [studentPasswordInput, setStudentPasswordInput] = useState('');
-  const [showDemoPasswords, setShowDemoPasswords] = useState(false);
   const [studentError, setStudentError] = useState<string | null>(null);
 
   if (!isOpen) return null;
@@ -234,6 +240,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   }}
                   className="w-full px-3 py-2.5 bg-white border border-stone-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-600 focus:border-amber-600 outline-none transition"
                 >
+                  <option value="">-- Selecione o seu nome na lista --</option>
                   {students.map((student) => (
                     <option key={student.id} value={student.id}>
                       {student.name} ({student.email})

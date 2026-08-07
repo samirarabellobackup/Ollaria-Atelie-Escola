@@ -22,6 +22,8 @@ export const TwoFactorModal: React.FC<TwoFactorModalProps> = ({
   // Generate new 6-digit OTP code every 30 seconds
   useEffect(() => {
     if (!isOpen) return;
+    setOtpCode('');
+    setError(null);
 
     const generateCode = () => {
       const code = Math.floor(100000 + Math.random() * 900000).toString();
