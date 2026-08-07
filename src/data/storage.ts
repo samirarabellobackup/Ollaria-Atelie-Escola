@@ -2,9 +2,9 @@ import { Student, ClassAttendance, FiringItem, StudioAnnouncement, StudioRates }
 import { INITIAL_STUDENTS, INITIAL_ATTENDANCE, INITIAL_FIRINGS, INITIAL_ANNOUNCEMENTS, INITIAL_RATES } from './mockData';
 
 const KEYS = {
-  STUDENTS: 'ollaria_students_v1',
-  ATTENDANCE: 'ollaria_attendance_v1',
-  FIRINGS: 'ollaria_firings_v1',
+  STUDENTS: 'ollaria_students_v4',
+  ATTENDANCE: 'ollaria_attendance_v4',
+  FIRINGS: 'ollaria_firings_v4',
   ANNOUNCEMENTS: 'ollaria_announcements_v1',
   RATES: 'ollaria_rates_v1',
   AUTH_ROLE: 'ollaria_auth_role_v1',
