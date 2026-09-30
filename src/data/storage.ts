@@ -1,4 +1,13 @@
-import { Student, ClassAttendance, FiringItem, StudioAnnouncement, StudioRates } from '../types';
+import { 
+  Student, 
+  ClassAttendance, 
+  FiringItem, 
+  StudioAnnouncement, 
+  StudioRates,
+  MaterialRecord,
+  ProfileChangeRequest,
+  AuditLogEntry
+} from '../types';
 import { INITIAL_STUDENTS, INITIAL_ATTENDANCE, INITIAL_FIRINGS, INITIAL_ANNOUNCEMENTS, INITIAL_RATES } from './mockData';
 
 const KEYS = {
@@ -11,6 +20,9 @@ const KEYS = {
   ACTIVE_STUDENT_ID: 'ollaria_active_student_id_v1',
   ADMIN_2FA: 'ollaria_admin_2fa_v1',
   ADMIN_CREDS: 'ollaria_admin_creds_v1',
+  MATERIALS: 'ollaria_materials_v1',
+  CHANGE_REQUESTS: 'ollaria_change_requests_v1',
+  AUDIT_LOGS: 'ollaria_audit_logs_v1',
 };
 
 export const StorageService = {
@@ -155,6 +167,48 @@ export const StorageService = {
     localStorage.setItem(KEYS.ADMIN_CREDS, JSON.stringify(creds));
   },
 
+  getMaterials(): MaterialRecord[] {
+    const data = localStorage.getItem(KEYS.MATERIALS);
+    if (!data) return [];
+    try {
+      return JSON.parse(data);
+    } catch {
+      return [];
+    }
+  },
+
+  saveMaterials(materials: MaterialRecord[]) {
+    localStorage.setItem(KEYS.MATERIALS, JSON.stringify(materials));
+  },
+
+  getChangeRequests(): ProfileChangeRequest[] {
+    const data = localStorage.getItem(KEYS.CHANGE_REQUESTS);
+    if (!data) return [];
+    try {
+      return JSON.parse(data);
+    } catch {
+      return [];
+    }
+  },
+
+  saveChangeRequests(requests: ProfileChangeRequest[]) {
+    localStorage.setItem(KEYS.CHANGE_REQUESTS, JSON.stringify(requests));
+  },
+
+  getAuditLogs(): AuditLogEntry[] {
+    const data = localStorage.getItem(KEYS.AUDIT_LOGS);
+    if (!data) return [];
+    try {
+      return JSON.parse(data);
+    } catch {
+      return [];
+    }
+  },
+
+  saveAuditLogs(logs: AuditLogEntry[]) {
+    localStorage.setItem(KEYS.AUDIT_LOGS, JSON.stringify(logs));
+  },
+
   resetAllData() {
     localStorage.removeItem(KEYS.STUDENTS);
     localStorage.removeItem(KEYS.ATTENDANCE);
@@ -165,5 +219,8 @@ export const StorageService = {
     localStorage.removeItem(KEYS.ACTIVE_STUDENT_ID);
     localStorage.removeItem(KEYS.ADMIN_2FA);
     localStorage.removeItem(KEYS.ADMIN_CREDS);
+    localStorage.removeItem(KEYS.MATERIALS);
+    localStorage.removeItem(KEYS.CHANGE_REQUESTS);
+    localStorage.removeItem(KEYS.AUDIT_LOGS);
   }
 };

@@ -1,7 +1,40 @@
 import React, { useState } from 'react';
-import { Student, ClassAttendance, FiringItem, StudioRates, FiringStage, ClassAttendanceStatus } from '../../types';
+import { 
+  Student, 
+  ClassAttendance, 
+  FiringItem, 
+  StudioRates, 
+  FiringStage, 
+  ClassAttendanceStatus,
+  MaterialRecord,
+  AuditLogEntry,
+  SERVICE_TYPES
+} from '../../types';
 import { DEFAULT_PLANS, generateStudentPassword } from '../../data/mockData';
-import { Calendar, Flame, DollarSign, Lock, Edit3, Plus, Trash2, CheckCircle2, AlertCircle, Phone, Mail, FileText, Send, Sparkles, Shield, User } from 'lucide-react';
+import { ensureUserServices, calculateUserFinancials, createAuditLog } from '../../data/serviceHelpers';
+import { UserServiceManager } from './UserServiceManager';
+import { AuditLogViewer } from './AuditLogViewer';
+import { 
+  Calendar, 
+  Flame, 
+  DollarSign, 
+  Lock, 
+  Edit3, 
+  Plus, 
+  Trash2, 
+  CheckCircle2, 
+  AlertCircle, 
+  Phone, 
+  Mail, 
+  FileText, 
+  Send, 
+  Sparkles, 
+  Shield, 
+  User,
+  Briefcase,
+  Package,
+  History
+} from 'lucide-react';
 
 interface StudentDetailModalProps {
   isOpen: boolean;
@@ -9,6 +42,8 @@ interface StudentDetailModalProps {
   attendance: ClassAttendance[];
   firings: FiringItem[];
   rates: StudioRates;
+  materials?: MaterialRecord[];
+  auditLogs?: AuditLogEntry[];
   onClose: () => void;
   onUpdateStudent: (updatedStudent: Student) => void;
   onAddAttendance: (attendanceRecord: ClassAttendance) => void;
@@ -17,6 +52,8 @@ interface StudentDetailModalProps {
   onUpdateFiringStage: (firingId: string, stage: FiringStage) => void;
   onToggleFiringPaid: (firingId: string) => void;
   onDeleteFiring: (firingId: string) => void;
+  onAddMaterial?: (material: MaterialRecord) => void;
+  onAddAuditLog?: (entry: AuditLogEntry) => void;
 }
 
 export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
@@ -25,6 +62,8 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
   attendance,
   firings,
   rates,
+  materials = [],
+  auditLogs = [],
   onClose,
   onUpdateStudent,
   onAddAttendance,
@@ -33,8 +72,10 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
   onUpdateFiringStage,
   onToggleFiringPaid,
   onDeleteFiring,
+  onAddMaterial,
+  onAddAuditLog,
 }) => {
-  const [activeTab, setActiveTab] = useState<'attendance' | 'firings' | 'financial' | 'permissions' | 'notes'>('attendance');
+  const [activeTab, setActiveTab] = useState<'services' | 'attendance' | 'firings' | 'materials' | 'financial' | 'permissions' | 'history' | 'notes'>('services');
 
   // New class state
   const [newClassDate, setNewClassDate] = useState(new Date().toISOString().split('T')[0]);
@@ -50,6 +91,11 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
   if (!isOpen || !student) return null;
 
   // Student specific data
+  const userServices = ensureUserServices(student);
+  const financials = calculateUserFinancials(student, materials);
+  const userMaterials = materials.filter((m) => m.userId === student.id);
+  const userAuditLogs = auditLogs.filter((l) => l.userId === student.id || l.userName === student.name);
+
   const studentAttendance = attendance.filter((a) => a.studentId === student.id);
   const studentFirings = firings.filter((f) => f.studentId === student.id);
 
@@ -196,6 +242,18 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                     {student.monthlyPlan.name}
                   </span>
                 </div>
+
+                {/* Service Badges */}
+                <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                  {userServices.filter(s => s.isActive).map((sub) => {
+                    const meta = SERVICE_TYPES[sub.type];
+                    return (
+                      <span key={sub.type} className={`text-[10px] font-bold px-2 py-0.5 rounded-full border shadow-xs ${meta.badgeColor}`}>
+                        {meta.name}
+                      </span>
+                    );
+                  })}
+                </div>
               </div>
             </div>
 
@@ -208,34 +266,52 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
             </button>
           </div>
 
-          {/* Quick Metrics Pills */}
+          {/* Quick Metrics Pills - Unified Financial & Operational */}
           <div className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
             <div className="bg-amber-900/50 border border-amber-800/80 p-2.5 rounded-xl">
-              <span className="text-[10px] text-amber-300">Aulas Realizadas no Mês</span>
-              <p className="text-base font-bold text-white mt-0.5">{presentCount} presenciais</p>
-            </div>
-
-            <div className="bg-amber-900/50 border border-amber-800/80 p-2.5 rounded-xl">
-              <span className="text-[10px] text-amber-300">Aulas Restantes</span>
-              <p className="text-base font-bold text-amber-200 mt-0.5">{remainingClasses} de {maxClasses}</p>
-            </div>
-
-            <div className="bg-amber-900/50 border border-amber-800/80 p-2.5 rounded-xl">
-              <span className="text-[10px] text-amber-300">Queimas a Pagar</span>
-              <p className="text-base font-bold text-amber-200 mt-0.5">
-                R$ {unpaidFiringsTotal.toFixed(2).replace('.', ',')}
+              <span className="text-[10px] text-amber-300">Total de Serviços</span>
+              <p className="text-base font-bold text-white mt-0.5">
+                R$ {financials.serviceFee.toFixed(2).replace('.', ',')}
               </p>
             </div>
 
             <div className="bg-amber-900/50 border border-amber-800/80 p-2.5 rounded-xl">
-              <span className="text-[10px] text-amber-300">Total Peças em Produção</span>
-              <p className="text-base font-bold text-white mt-0.5">{studentFirings.length} peças</p>
+              <span className="text-[10px] text-amber-300">Materiais (Cobrança)</span>
+              <p className="text-base font-bold text-amber-200 mt-0.5">
+                R$ {financials.materialsFee.toFixed(2).replace('.', ',')}
+              </p>
+            </div>
+
+            <div className="bg-amber-900/50 border border-amber-800/80 p-2.5 rounded-xl">
+              <span className="text-[10px] text-amber-300">Total Pago</span>
+              <p className="text-base font-bold text-emerald-300 mt-0.5">
+                R$ {financials.paidAmount.toFixed(2).replace('.', ',')}
+              </p>
+            </div>
+
+            <div className="bg-amber-900/50 border border-amber-800/80 p-2.5 rounded-xl">
+              <span className="text-[10px] text-amber-300">Saldo Pendente</span>
+              <p className="text-base font-bold text-amber-200 mt-0.5">
+                R$ {financials.pendingAmount.toFixed(2).replace('.', ',')}
+              </p>
             </div>
           </div>
         </div>
 
         {/* Modal Navigation Tabs */}
-        <div className="flex border-b border-stone-200 bg-stone-100 px-6 pt-3 space-x-2 sm:space-x-4 overflow-x-auto">
+        <div className="flex border-b border-stone-200 bg-stone-100 px-6 pt-3 space-x-2 sm:space-x-3 overflow-x-auto">
+          <button
+            onClick={() => setActiveTab('services')}
+            className={`pb-3 text-xs font-bold border-b-2 transition flex items-center space-x-1.5 shrink-0 ${
+              activeTab === 'services'
+                ? 'border-amber-800 text-amber-900'
+                : 'border-transparent text-stone-500 hover:text-stone-800'
+            }`}
+          >
+            <Briefcase className="w-4 h-4" />
+            <span>Serviços & Contratos ({userServices.filter(s => s.isActive).length})</span>
+          </button>
+
           <button
             onClick={() => setActiveTab('attendance')}
             className={`pb-3 text-xs font-bold border-b-2 transition flex items-center space-x-1.5 shrink-0 ${
@@ -245,7 +321,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
             }`}
           >
             <Calendar className="w-4 h-4" />
-            <span>Chamada & Presenças</span>
+            <span>Aulas & Chamada</span>
           </button>
 
           <button
@@ -261,6 +337,18 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
           </button>
 
           <button
+            onClick={() => setActiveTab('materials')}
+            className={`pb-3 text-xs font-bold border-b-2 transition flex items-center space-x-1.5 shrink-0 ${
+              activeTab === 'materials'
+                ? 'border-amber-800 text-amber-900'
+                : 'border-transparent text-stone-500 hover:text-stone-800'
+            }`}
+          >
+            <Package className="w-4 h-4" />
+            <span>Materiais Utilizados ({userMaterials.length})</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab('financial')}
             className={`pb-3 text-xs font-bold border-b-2 transition flex items-center space-x-1.5 shrink-0 ${
               activeTab === 'financial'
@@ -269,7 +357,7 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
             }`}
           >
             <DollarSign className="w-4 h-4" />
-            <span>Vencimento & Mensalidade</span>
+            <span>Financeiro Unificado</span>
           </button>
 
           <button
@@ -282,6 +370,18 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
           >
             <Shield className="w-4 h-4" />
             <span>Permissões do Portal</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('history')}
+            className={`pb-3 text-xs font-bold border-b-2 transition flex items-center space-x-1.5 shrink-0 ${
+              activeTab === 'history'
+                ? 'border-amber-800 text-amber-900'
+                : 'border-transparent text-stone-500 hover:text-stone-800'
+            }`}
+          >
+            <History className="w-4 h-4" />
+            <span>Histórico ({userAuditLogs.length})</span>
           </button>
 
           <button
@@ -300,6 +400,15 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
         {/* Tab Body Contents */}
         <div className="p-6 overflow-y-auto flex-1 space-y-6">
           
+          {/* TAB 0: SERVICES & CONTRACTS */}
+          {activeTab === 'services' && (
+            <UserServiceManager
+              student={student}
+              onUpdateStudent={onUpdateStudent}
+              onAddAuditLog={onAddAuditLog}
+            />
+          )}
+
           {/* TAB 1: ATTENDANCE & PRESENCE CONTROL */}
           {activeTab === 'attendance' && (
             <div className="space-y-6">
@@ -577,9 +686,140 @@ export const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
             </div>
           )}
 
-          {/* TAB 3: FINANCIAL & DUES */}
+          {/* TAB 3: MATERIALS CONSUMED */}
+          {activeTab === 'materials' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between bg-stone-50 p-4 rounded-xl border border-stone-200">
+                <div>
+                  <h4 className="font-bold text-stone-900 text-sm flex items-center gap-1.5">
+                    <Package className="w-4 h-4 text-amber-800" />
+                    <span>Materiais Consumidos por {student.name}</span>
+                  </h4>
+                  <p className="text-xs text-stone-500">
+                    Argilas, esmaltes, engobes e insumos vinculados aos serviços contratados.
+                  </p>
+                </div>
+                <div className="text-right">
+                  <span className="text-xs text-stone-500 block">Total a Cobrar</span>
+                  <span className="text-base font-bold font-serif text-stone-900">
+                    R$ {financials.materialsFee.toFixed(2).replace('.', ',')}
+                  </span>
+                </div>
+              </div>
+
+              {userMaterials.length === 0 ? (
+                <div className="p-8 text-center text-stone-400 bg-white rounded-xl border border-stone-200">
+                  <Package className="w-8 h-8 mx-auto text-stone-300 mb-1" />
+                  <p>Nenhum registro de material para este usuário ainda.</p>
+                  <p className="text-[11px] text-stone-400 mt-1">
+                    Você pode registrar novos consumos pela aba geral "Materiais & Insumos" no menu principal.
+                  </p>
+                </div>
+              ) : (
+                <div className="bg-white rounded-xl border border-stone-200 overflow-hidden divide-y divide-stone-100">
+                  {userMaterials.map((m) => (
+                    <div key={m.id} className="p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-stone-50">
+                      <div>
+                        <div className="flex items-center space-x-2">
+                          <span className="font-bold text-stone-900 text-xs">{m.materialName}</span>
+                          <span className="text-[10px] text-stone-500 font-mono">({m.date})</span>
+                        </div>
+                        <p className="text-[11px] text-stone-500 mt-0.5">
+                          {m.quantity} {m.unit} • R$ {m.unitPrice.toFixed(2)}/{m.unit}
+                          {m.notes && <span className="italic ml-1">({m.notes})</span>}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center space-x-3 shrink-0">
+                        <span
+                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                            m.compensationType === 'Cobrar'
+                              ? 'bg-amber-100 text-amber-900 border-amber-300'
+                              : m.compensationType === 'Repor'
+                              ? 'bg-orange-100 text-orange-900 border-orange-300'
+                              : 'bg-emerald-100 text-emerald-900 border-emerald-300'
+                          }`}
+                        >
+                          {m.compensationType}
+                        </span>
+
+                        <span className="font-serif font-bold text-xs text-stone-900">
+                          R$ {m.totalPrice.toFixed(2).replace('.', ',')}
+                        </span>
+
+                        {m.compensationType === 'Cobrar' && (
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
+                            m.paymentStatus === 'Pago'
+                              ? 'bg-emerald-100 text-emerald-800'
+                              : 'bg-red-100 text-red-800'
+                          }`}>
+                            {m.paymentStatus || 'Pendente'}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* TAB 4: FINANCIAL & DUES */}
           {activeTab === 'financial' && (
             <div className="space-y-6">
+              {/* Unified Financial Breakdown Card */}
+              <div className="bg-stone-900 text-stone-100 p-5 rounded-2xl border border-stone-800 space-y-4 shadow-sm">
+                <div className="flex items-center justify-between border-b border-stone-800 pb-3">
+                  <div>
+                    <h4 className="font-serif font-bold text-white text-base">
+                      Extrato Financeiro Unificado
+                    </h4>
+                    <p className="text-xs text-stone-400">
+                      Consolidação de todos os serviços contratados e materiais utilizados.
+                    </p>
+                  </div>
+                  <span className="text-xs font-bold text-amber-400 bg-stone-800 px-3 py-1 rounded-lg">
+                    {student.name}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs">
+                  <div className="bg-stone-800/80 p-3 rounded-xl">
+                    <span className="text-[10px] text-stone-400 uppercase font-semibold block">Serviços Contratados</span>
+                    <span className="text-base font-bold text-white font-serif mt-1 block">
+                      R$ {financials.serviceFee.toFixed(2).replace('.', ',')}
+                    </span>
+                  </div>
+
+                  <div className="bg-stone-800/80 p-3 rounded-xl">
+                    <span className="text-[10px] text-stone-400 uppercase font-semibold block">Materiais a Cobrar</span>
+                    <span className="text-base font-bold text-amber-300 font-serif mt-1 block">
+                      R$ {financials.materialsFee.toFixed(2).replace('.', ',')}
+                    </span>
+                  </div>
+
+                  <div className="bg-stone-800/80 p-3 rounded-xl">
+                    <span className="text-[10px] text-stone-400 uppercase font-semibold block">Total Geral</span>
+                    <span className="text-base font-bold text-white font-serif mt-1 block">
+                      R$ {financials.totalFee.toFixed(2).replace('.', ',')}
+                    </span>
+                  </div>
+
+                  <div className="bg-stone-800/80 p-3 rounded-xl">
+                    <span className="text-[10px] text-emerald-400 uppercase font-semibold block">Total Pago</span>
+                    <span className="text-base font-bold text-emerald-400 font-serif mt-1 block">
+                      R$ {financials.paidAmount.toFixed(2).replace('.', ',')}
+                    </span>
+                  </div>
+
+                  <div className="bg-stone-800/80 p-3 rounded-xl">
+                    <span className="text-[10px] text-red-400 uppercase font-semibold block">Saldo Pendente</span>
+                    <span className="text-base font-bold text-red-400 font-serif mt-1 block">
+                      R$ {financials.pendingAmount.toFixed(2).replace('.', ',')}
+                    </span>
+                  </div>
+                </div>
+              </div>
               {/* Dues Status Manager */}
               <div className="bg-white p-5 rounded-xl border border-stone-200 shadow-sm space-y-4">
                 <h4 className="font-serif font-bold text-stone-900 text-base">
