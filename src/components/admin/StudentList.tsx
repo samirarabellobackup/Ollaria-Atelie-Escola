@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { Student, ClassAttendance, FiringItem } from '../../types';
-import { Search, Plus, FileSpreadsheet, Lock, Eye, ShieldCheck, Phone, Mail, Calendar, Flame, AlertCircle, CheckCircle2, ChevronRight, Filter, Users } from 'lucide-react';
+import { Search, Plus, UserPlus, Lock, Eye, ShieldCheck, Phone, Mail, Calendar, Flame, AlertCircle, CheckCircle2, ChevronRight, Filter, Users } from 'lucide-react';
 
 interface StudentListProps {
   students: Student[];
   attendance: ClassAttendance[];
   firings: FiringItem[];
   onOpenStudentDetail: (student: Student) => void;
-  onOpenGoogleFormsModal: () => void;
+  onOpenAddStudentModal: () => void;
   onTogglePermission: (studentId: string, permissionKey: keyof Student['permissions']) => void;
 }
 
@@ -16,11 +16,11 @@ export const StudentList: React.FC<StudentListProps> = ({
   attendance,
   firings,
   onOpenStudentDetail,
-  onOpenGoogleFormsModal,
+  onOpenAddStudentModal,
   onTogglePermission,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'Todos' | 'Ativo' | 'Vencido' | 'GoogleForms'>('Todos');
+  const [statusFilter, setStatusFilter] = useState<'Todos' | 'Ativo' | 'Vencido'>('Todos');
 
   // Filter students
   const filteredStudents = students.filter((student) => {
@@ -33,7 +33,6 @@ export const StudentList: React.FC<StudentListProps> = ({
 
     if (statusFilter === 'Ativo') return student.status === 'Ativo';
     if (statusFilter === 'Vencido') return student.duesStatus.status === 'Vencido';
-    if (statusFilter === 'GoogleForms') return student.googleFormsOrigin === true;
 
     return true;
   });
@@ -53,11 +52,11 @@ export const StudentList: React.FC<StudentListProps> = ({
 
         <div className="flex items-center space-x-2 shrink-0">
           <button
-            onClick={onOpenGoogleFormsModal}
-            className="px-3.5 py-2 bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center space-x-1.5"
+            onClick={onOpenAddStudentModal}
+            className="px-4 py-2 bg-amber-800 hover:bg-amber-900 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center space-x-1.5"
           >
-            <FileSpreadsheet className="w-4 h-4 text-emerald-300" />
-            <span>Importar do Google Forms</span>
+            <UserPlus className="w-4 h-4 text-amber-300" />
+            <span>Cadastrar Novo Aluno</span>
           </button>
         </div>
       </div>
@@ -90,21 +89,21 @@ export const StudentList: React.FC<StudentListProps> = ({
           </button>
 
           <button
+            onClick={() => setStatusFilter('Ativo')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold shrink-0 transition ${
+              statusFilter === 'Ativo' ? 'bg-emerald-800 text-white shadow-sm' : 'bg-white text-emerald-800 hover:bg-emerald-50'
+            }`}
+          >
+            Ativos ({students.filter((s) => s.status === 'Ativo').length})
+          </button>
+
+          <button
             onClick={() => setStatusFilter('Vencido')}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold shrink-0 transition ${
               statusFilter === 'Vencido' ? 'bg-red-800 text-white shadow-sm' : 'bg-white text-red-700 hover:bg-red-50'
             }`}
           >
             Vencidos ({students.filter((s) => s.duesStatus.status === 'Vencido').length})
-          </button>
-
-          <button
-            onClick={() => setStatusFilter('GoogleForms')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold shrink-0 transition ${
-              statusFilter === 'GoogleForms' ? 'bg-emerald-800 text-white shadow-sm' : 'bg-white text-emerald-800 hover:bg-emerald-50'
-            }`}
-          >
-            Google Forms ({students.filter((s) => s.googleFormsOrigin).length})
           </button>
         </div>
       </div>
@@ -121,18 +120,18 @@ export const StudentList: React.FC<StudentListProps> = ({
             </h3>
             <p className="text-xs text-stone-500 mt-1">
               {students.length === 0
-                ? 'O cadastro de alunos está completamente zerado. Você pode iniciar sincronizando a planilha do Google Forms ou incluindo alunos manualmente.'
+                ? 'O cadastro de alunos está completamente zerado. Clique no botão abaixo para cadastrar alunos manualmente.'
                 : 'Nenhum aluno corresponde aos critérios de busca ou filtros selecionados.'}
             </p>
           </div>
           {students.length === 0 && (
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
               <button
-                onClick={onOpenGoogleFormsModal}
-                className="px-5 py-2.5 bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center space-x-2"
+                onClick={onOpenAddStudentModal}
+                className="px-5 py-2.5 bg-amber-800 hover:bg-amber-900 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center space-x-2"
               >
-                <FileSpreadsheet className="w-4 h-4 text-emerald-300" />
-                <span>Sincronizar Google Forms / Planilha</span>
+                <UserPlus className="w-4 h-4 text-amber-300" />
+                <span>Cadastrar Novo Aluno</span>
               </button>
             </div>
           )}
@@ -278,13 +277,7 @@ export const StudentList: React.FC<StudentListProps> = ({
 
                 {/* Card Footer Action */}
                 <div className="p-4 bg-stone-100 border-t border-stone-200 flex items-center justify-between">
-                  {student.googleFormsOrigin ? (
-                    <span className="text-[10px] text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded font-medium flex items-center gap-1">
-                      <FileSpreadsheet className="w-3 h-3" /> Origem Google Forms
-                    </span>
-                  ) : (
-                    <span className="text-[10px] text-stone-500">Matrícula Direta</span>
-                  )}
+                  <span className="text-[10px] text-stone-600 font-medium">Matrícula Ateliê</span>
 
                   <button
                     onClick={() => onOpenStudentDetail(student)}

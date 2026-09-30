@@ -4,7 +4,7 @@ import { StorageService } from './data/storage';
 import { Navbar } from './components/Navbar';
 import { AuthModal } from './components/AuthModal';
 import { TwoFactorModal } from './components/TwoFactorModal';
-import { GoogleFormsImportModal } from './components/GoogleFormsImportModal';
+import { AddStudentModal } from './components/admin/AddStudentModal';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { StudentList } from './components/admin/StudentList';
 import { AttendanceManager } from './components/admin/AttendanceManager';
@@ -12,7 +12,7 @@ import { FiringsManager } from './components/admin/FiringsManager';
 import { FinancesManager } from './components/admin/FinancesManager';
 import { StudentDetailModal } from './components/admin/StudentDetailModal';
 import { StudentPortal } from './components/student/StudentPortal';
-import { Users, Calendar, Flame, DollarSign, LayoutDashboard, ShieldCheck, FileSpreadsheet, Lock } from 'lucide-react';
+import { Users, Calendar, Flame, DollarSign, LayoutDashboard, ShieldCheck, Lock } from 'lucide-react';
 
 export default function App() {
   // App State loaded from Storage
@@ -31,7 +31,7 @@ export default function App() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
   const [authModalInitialRole, setAuthModalInitialRole] = useState<UserRole>('admin');
   const [is2FAModalOpen, setIs2FAModalOpen] = useState<boolean>(false);
-  const [isGoogleFormsModalOpen, setIsGoogleFormsModalOpen] = useState<boolean>(false);
+  const [isAddStudentModalOpen, setIsAddStudentModalOpen] = useState<boolean>(false);
   const [selectedStudentForDetail, setSelectedStudentForDetail] = useState<Student | null>(null);
 
   const [activeAdminTab, setActiveAdminTab] = useState<'dashboard' | 'students' | 'attendance' | 'firings' | 'finances'>('dashboard');
@@ -195,7 +195,6 @@ export default function App() {
         isAdmin2FAVerified={isAdmin2FAVerified}
         onOpenAuth={handleOpenAuth}
         onLogout={handleLogout}
-        onOpenGoogleFormsModal={() => setIsGoogleFormsModalOpen(true)}
         onResetDemoData={handleResetDemoData}
       />
 
@@ -248,7 +247,7 @@ export default function App() {
                     <li className="flex items-center gap-2">✓ Chamada diária, reposição e histórico de faltas</li>
                     <li className="flex items-center gap-2">✓ Controle do Forno: biscoito, esmalte e queimas à pagar</li>
                     <li className="flex items-center gap-2">✓ Financeiro completo e mensalidades do ateliê</li>
-                    <li className="flex items-center gap-2">✓ Importador de respostas de formulários (Google Forms)</li>
+                    <li className="flex items-center gap-2">✓ Cadastro e matrícula manual de novos alunos</li>
                   </ul>
                 </div>
 
@@ -370,7 +369,7 @@ export default function App() {
                 rates={rates}
                 onOpenStudentDetail={(student) => setSelectedStudentForDetail(student)}
                 onNavigateTab={(tab) => setActiveAdminTab(tab)}
-                onOpenGoogleFormsModal={() => setIsGoogleFormsModalOpen(true)}
+                onOpenAddStudentModal={() => setIsAddStudentModalOpen(true)}
               />
             )}
 
@@ -380,7 +379,7 @@ export default function App() {
                 attendance={attendance}
                 firings={firings}
                 onOpenStudentDetail={(student) => setSelectedStudentForDetail(student)}
-                onOpenGoogleFormsModal={() => setIsGoogleFormsModalOpen(true)}
+                onOpenAddStudentModal={() => setIsAddStudentModalOpen(true)}
                 onTogglePermission={handleToggleStudentPermission}
               />
             )}
@@ -444,9 +443,9 @@ export default function App() {
         onCancel={() => setIs2FAModalOpen(false)}
       />
 
-      <GoogleFormsImportModal
-        isOpen={isGoogleFormsModalOpen}
-        onClose={() => setIsGoogleFormsModalOpen(false)}
+      <AddStudentModal
+        isOpen={isAddStudentModalOpen}
+        onClose={() => setIsAddStudentModalOpen(false)}
         onStudentEnrolled={handleStudentEnrolled}
         existingStudents={students}
       />

@@ -1,6 +1,6 @@
 import React from 'react';
 import { UserRole, Student } from '../types';
-import { Flame, ShieldCheck, UserCheck, LogOut, Lock, FileSpreadsheet, Sparkles, Building2, User } from 'lucide-react';
+import { Flame, ShieldCheck, UserCheck, LogOut, Lock, Sparkles, Building2, User } from 'lucide-react';
 
 interface NavbarProps {
   currentRole: UserRole | null;
@@ -8,7 +8,6 @@ interface NavbarProps {
   isAdmin2FAVerified: boolean;
   onOpenAuth: (role: UserRole) => void;
   onLogout: () => void;
-  onOpenGoogleFormsModal: () => void;
   onResetDemoData: () => void;
 }
 
@@ -18,7 +17,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   isAdmin2FAVerified,
   onOpenAuth,
   onLogout,
-  onOpenGoogleFormsModal,
   onResetDemoData,
 }) => {
   return (
@@ -46,17 +44,6 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Right Section Actions & User Badges */}
         <div className="flex items-center space-x-2 sm:space-x-3">
-          {currentRole === 'admin' && isAdmin2FAVerified && (
-            <button
-              onClick={onOpenGoogleFormsModal}
-              className="hidden md:flex items-center space-x-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-emerald-900/60 hover:bg-emerald-800 text-emerald-200 border border-emerald-700/50 transition-all shadow-sm"
-              title="Importar respostas de formulário Google Forms"
-            >
-              <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
-              <span>Google Forms</span>
-            </button>
-          )}
-
           {/* Active Role Status & Switch Controls */}
           {currentRole === 'admin' ? (
             <div className="flex items-center space-x-2 bg-amber-900/90 border border-amber-600/80 px-3 py-1.5 rounded-xl text-xs shadow-md">

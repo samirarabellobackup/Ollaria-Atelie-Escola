@@ -1,6 +1,6 @@
 import React from 'react';
 import { Student, ClassAttendance, FiringItem, StudioAnnouncement, StudioRates } from '../../types';
-import { Users, Flame, Calendar, DollarSign, AlertTriangle, CheckCircle2, TrendingUp, Plus, FileSpreadsheet, Send, Sparkles, ChevronRight, ShieldAlert } from 'lucide-react';
+import { Users, Flame, Calendar, DollarSign, AlertTriangle, CheckCircle2, TrendingUp, Plus, UserPlus, Send, Sparkles, ChevronRight, ShieldAlert } from 'lucide-react';
 
 interface AdminDashboardProps {
   students: Student[];
@@ -10,7 +10,7 @@ interface AdminDashboardProps {
   rates: StudioRates;
   onOpenStudentDetail: (student: Student) => void;
   onNavigateTab: (tab: 'students' | 'attendance' | 'firings' | 'finances') => void;
-  onOpenGoogleFormsModal: () => void;
+  onOpenAddStudentModal: () => void;
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
@@ -21,7 +21,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   rates,
   onOpenStudentDetail,
   onNavigateTab,
-  onOpenGoogleFormsModal,
+  onOpenAddStudentModal,
 }) => {
   // Stats Calculations
   const activeStudents = students.filter((s) => s.status === 'Ativo');
@@ -70,11 +70,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
           <div className="flex flex-wrap items-center gap-3 shrink-0">
             <button
-              onClick={onOpenGoogleFormsModal}
-              className="px-4 py-2.5 bg-emerald-800 hover:bg-emerald-700 text-emerald-100 font-bold text-xs sm:text-sm rounded-xl shadow-md border border-emerald-600/50 transition flex items-center space-x-2"
+              onClick={onOpenAddStudentModal}
+              className="px-4 py-2.5 bg-amber-800 hover:bg-amber-700 text-amber-100 font-bold text-xs sm:text-sm rounded-xl shadow-md border border-amber-600/50 transition flex items-center space-x-2"
             >
-              <FileSpreadsheet className="w-4 h-4 text-emerald-300" />
-              <span>Matricular via Google Forms</span>
+              <UserPlus className="w-4 h-4 text-amber-300" />
+              <span>Cadastrar Novo Aluno</span>
             </button>
 
             <button
@@ -311,14 +311,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       </td>
 
                       <td className="py-3 px-3">
-                        {student.googleFormsOrigin ? (
-                          <span className="inline-flex items-center space-x-1 text-[10px] text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                            <FileSpreadsheet className="w-3 h-3 text-emerald-600" />
-                            <span>Google Forms</span>
-                          </span>
-                        ) : (
-                          <span className="text-[10px] text-stone-500">Manual</span>
-                        )}
+                        <span className="text-[10px] text-stone-600 font-medium">Ateliê</span>
                       </td>
 
                       <td className="py-3 px-3 text-right">
