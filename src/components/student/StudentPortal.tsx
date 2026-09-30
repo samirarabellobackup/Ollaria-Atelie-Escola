@@ -20,6 +20,19 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
   const [activeTab, setActiveTab] = useState<'overview' | 'attendance' | 'firings' | 'projects'>('overview');
   const [copiedPix, setCopiedPix] = useState(false);
 
+  // Fallback to overview if the active tab is forbidden by permissions
+  React.useEffect(() => {
+    if (activeTab === 'attendance' && !student.permissions.canViewAttendance) {
+      setActiveTab('overview');
+    }
+    if (activeTab === 'firings' && !student.permissions.canViewFirings) {
+      setActiveTab('overview');
+    }
+    if (activeTab === 'projects' && !student.permissions.canViewProjectStatus) {
+      setActiveTab('overview');
+    }
+  }, [activeTab, student.permissions]);
+
   // Filter student data strictly
   const studentAttendance = attendance.filter((a) => a.studentId === student.id);
   const studentFirings = firings.filter((f) => f.studentId === student.id);
@@ -91,100 +104,115 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
             </div>
           </div>
 
-          <div className="bg-amber-950/80 p-3 rounded-xl border border-amber-700/60 text-xs shrink-0">
-            <span className="text-amber-300/80 block text-[10px]">Situação da Mensalidade:</span>
-            <span
-              className={`font-bold text-sm inline-block mt-0.5 ${
-                student.duesStatus.status === 'Pago'
-                  ? 'text-emerald-400'
-                  : student.duesStatus.status === 'Vencido'
-                  ? 'text-red-400'
-                  : 'text-amber-300'
-              }`}
-            >
-              {student.duesStatus.status} (Venceu/Vence em {student.duesStatus.dueDate})
-            </span>
-          </div>
+          {student.permissions.canViewFinancials && (
+            <div className="bg-amber-950/80 p-3 rounded-xl border border-amber-700/60 text-xs shrink-0">
+              <span className="text-amber-300/80 block text-[10px]">Situação da Mensalidade:</span>
+              <span
+                className={`font-bold text-sm inline-block mt-0.5 ${
+                  student.duesStatus.status === 'Pago'
+                    ? 'text-emerald-400'
+                    : student.duesStatus.status === 'Vencido'
+                    ? 'text-red-400'
+                    : 'text-amber-300'
+                }`}
+              >
+                {student.duesStatus.status} (Venceu/Vence em {student.duesStatus.dueDate})
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
       {/* KPI Cards for Student */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Remaining Classes */}
-        <div className="bg-white p-5 rounded-2xl border border-stone-200 shadow-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-stone-500">Aulas no Mês (Agosto)</span>
-            <div className="p-2 bg-amber-100 text-amber-800 rounded-xl">
-              <Calendar className="w-5 h-5" />
+      {(student.permissions.canViewAttendance ||
+        student.permissions.canViewFirings ||
+        student.permissions.canViewProjectStatus ||
+        student.permissions.canViewFinancials) && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Remaining Classes */}
+          {student.permissions.canViewAttendance && (
+            <div className="bg-white p-5 rounded-2xl border border-stone-200 shadow-sm">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-stone-500">Aulas no Mês (Agosto)</span>
+                <div className="p-2 bg-amber-100 text-amber-800 rounded-xl">
+                  <Calendar className="w-5 h-5" />
+                </div>
+              </div>
+              <div className="mt-3 flex items-baseline justify-between">
+                <span className="text-3xl font-bold font-serif text-amber-950">{remainingClasses}</span>
+                <span className="text-xs font-semibold text-stone-600">de {maxClasses} aulas faltam</span>
+              </div>
+              <p className="text-[11px] text-stone-500 mt-2">
+                Presenças no mês: <b className="text-emerald-700">{presentCount}</b> | Faltas: <b className="text-stone-700">{lostCount + canceledCount}</b>
+              </p>
             </div>
-          </div>
-          <div className="mt-3 flex items-baseline justify-between">
-            <span className="text-3xl font-bold font-serif text-amber-950">{remainingClasses}</span>
-            <span className="text-xs font-semibold text-stone-600">de {maxClasses} aulas faltam</span>
-          </div>
-          <p className="text-[11px] text-stone-500 mt-2">
-            Presenças no mês: <b className="text-emerald-700">{presentCount}</b> | Faltas: <b className="text-stone-700">{lostCount + canceledCount}</b>
-          </p>
-        </div>
+          )}
 
-        {/* Queimas a Pagar */}
-        <div className="bg-white p-5 rounded-2xl border border-stone-200 shadow-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-stone-500">Queimas a Pagar</span>
-            <div className="p-2 bg-orange-100 text-orange-800 rounded-xl">
-              <Flame className="w-5 h-5" />
+          {/* Queimas a Pagar */}
+          {student.permissions.canViewFirings && (
+            <div className="bg-white p-5 rounded-2xl border border-stone-200 shadow-sm">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-stone-500">Queimas a Pagar</span>
+                <div className="p-2 bg-orange-100 text-orange-800 rounded-xl">
+                  <Flame className="w-5 h-5" />
+                </div>
+              </div>
+              <div className="mt-3 flex items-baseline justify-between">
+                <span className="text-2xl font-bold font-serif text-stone-900">
+                  R$ {unpaidFiringsTotal.toFixed(2).replace('.', ',')}
+                </span>
+                <span className="text-xs font-semibold text-orange-800 bg-orange-50 px-2 py-0.5 rounded">
+                  {unpaidFirings.length} peças
+                </span>
+              </div>
+              <p className="text-[11px] text-stone-500 mt-2">
+                Calculado automaticamente pelo peso x taxa do ateliê
+              </p>
             </div>
-          </div>
-          <div className="mt-3 flex items-baseline justify-between">
-            <span className="text-2xl font-bold font-serif text-stone-900">
-              R$ {unpaidFiringsTotal.toFixed(2).replace('.', ',')}
-            </span>
-            <span className="text-xs font-semibold text-orange-800 bg-orange-50 px-2 py-0.5 rounded">
-              {unpaidFirings.length} peças
-            </span>
-          </div>
-          <p className="text-[11px] text-stone-500 mt-2">
-            Calculado automaticamente pelo peso x taxa do ateliê
-          </p>
-        </div>
+          )}
 
-        {/* Active Projects */}
-        <div className="bg-white p-5 rounded-2xl border border-stone-200 shadow-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-stone-500">Projetos em Produção</span>
-            <div className="p-2 bg-amber-100 text-amber-900 rounded-xl">
-              <Sparkles className="w-5 h-5" />
+          {/* Active Projects */}
+          {student.permissions.canViewProjectStatus && (
+            <div className="bg-white p-5 rounded-2xl border border-stone-200 shadow-sm">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-stone-500">Projetos em Produção</span>
+                <div className="p-2 bg-amber-100 text-amber-900 rounded-xl">
+                  <Sparkles className="w-5 h-5" />
+                </div>
+              </div>
+              <div className="mt-3 flex items-baseline justify-between">
+                <span className="text-3xl font-bold font-serif text-stone-900">{studentFirings.length}</span>
+                <span className="text-xs font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded">
+                  {readyProjects.length} prontos p/ retirar
+                </span>
+              </div>
+              <p className="text-[11px] text-stone-500 mt-2">Estágios no forno e secagem</p>
             </div>
-          </div>
-          <div className="mt-3 flex items-baseline justify-between">
-            <span className="text-3xl font-bold font-serif text-stone-900">{studentFirings.length}</span>
-            <span className="text-xs font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded">
-              {readyProjects.length} prontos p/ retirar
-            </span>
-          </div>
-          <p className="text-[11px] text-stone-500 mt-2">Estágios no forno e secagem</p>
-        </div>
+          )}
 
-        {/* Pix Helper Box */}
-        <div className="bg-stone-900 text-stone-100 p-5 rounded-2xl shadow-sm border border-stone-800 flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-amber-300 font-bold">Pagamento via Pix</span>
-              <DollarSign className="w-4 h-4 text-amber-400" />
+          {/* Pix Helper Box */}
+          {student.permissions.canViewFinancials && (
+            <div className="bg-stone-900 text-stone-100 p-5 rounded-2xl shadow-sm border border-stone-800 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-amber-300 font-bold">Pagamento via Pix</span>
+                  <DollarSign className="w-4 h-4 text-amber-400" />
+                </div>
+                <p className="text-[11px] text-stone-400 mt-1">Chave oficial do ateliê:</p>
+                <p className="font-mono text-xs font-bold text-white mt-0.5 truncate">ollariaatelie@gmail.com</p>
+              </div>
+
+              <button
+                onClick={handleCopyPix}
+                className="mt-3 w-full py-1.5 bg-amber-800 hover:bg-amber-700 text-white font-bold text-xs rounded-lg transition flex items-center justify-center space-x-1"
+              >
+                {copiedPix ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                <span>{copiedPix ? 'Chave Copiada!' : 'Copiar Chave Pix'}</span>
+              </button>
             </div>
-            <p className="text-[11px] text-stone-400 mt-1">Chave oficial do ateliê:</p>
-            <p className="font-mono text-xs font-bold text-white mt-0.5 truncate">ollariaatelie@gmail.com</p>
-          </div>
-
-          <button
-            onClick={handleCopyPix}
-            className="mt-3 w-full py-1.5 bg-amber-800 hover:bg-amber-700 text-white font-bold text-xs rounded-lg transition flex items-center justify-center space-x-1"
-          >
-            {copiedPix ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-            <span>{copiedPix ? 'Chave Copiada!' : 'Copiar Chave Pix'}</span>
-          </button>
+          )}
         </div>
-      </div>
+      )}
 
       {/* Tabs Selection */}
       <div className="flex border-b border-stone-200 bg-stone-100 px-6 pt-3 space-x-4">

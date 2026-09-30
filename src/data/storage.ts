@@ -10,6 +10,7 @@ const KEYS = {
   AUTH_ROLE: 'ollaria_auth_role_v1',
   ACTIVE_STUDENT_ID: 'ollaria_active_student_id_v1',
   ADMIN_2FA: 'ollaria_admin_2fa_v1',
+  ADMIN_CREDS: 'ollaria_admin_creds_v1',
 };
 
 export const StorageService = {
@@ -134,6 +135,26 @@ export const StorageService = {
     }
   },
 
+  getAdminCredentials(): { email: string; password: string } {
+    const data = localStorage.getItem(KEYS.ADMIN_CREDS);
+    if (!data) {
+      return { email: 'ollariaatelie@gmail.com', password: 'admin2026' };
+    }
+    try {
+      const parsed = JSON.parse(data);
+      return {
+        email: parsed.email || 'ollariaatelie@gmail.com',
+        password: parsed.password || 'admin2026',
+      };
+    } catch {
+      return { email: 'ollariaatelie@gmail.com', password: 'admin2026' };
+    }
+  },
+
+  saveAdminCredentials(creds: { email: string; password: string }) {
+    localStorage.setItem(KEYS.ADMIN_CREDS, JSON.stringify(creds));
+  },
+
   resetAllData() {
     localStorage.removeItem(KEYS.STUDENTS);
     localStorage.removeItem(KEYS.ATTENDANCE);
@@ -143,5 +164,6 @@ export const StorageService = {
     localStorage.removeItem(KEYS.AUTH_ROLE);
     localStorage.removeItem(KEYS.ACTIVE_STUDENT_ID);
     localStorage.removeItem(KEYS.ADMIN_2FA);
+    localStorage.removeItem(KEYS.ADMIN_CREDS);
   }
 };

@@ -71,23 +71,30 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         setStudentError('Nenhum aluno encontrado com este e-mail. Verifique o e-mail ou selecione na lista.');
         return;
       }
-    } else {
+    } else if (selectedStudentId) {
       foundStudent = students.find((s) => s.id === selectedStudentId);
     }
 
     if (!foundStudent) {
-      setStudentError('Por favor, selecione um aluno válido.');
+      setStudentError('Por favor, informe seu e-mail cadastrado ou selecione seu nome na lista.');
       return;
     }
 
-    // Password validation if student has password
-    if (foundStudent.password && studentPasswordInput.trim()) {
-      if (studentPasswordInput.trim() !== foundStudent.password) {
-        setStudentError('Senha incorreta para este aluno. Tente novamente ou consulte a recepção do ateliê.');
-        return;
-      }
-    } else if (foundStudent.password && !studentPasswordInput.trim()) {
+    if (foundStudent.status === 'Inativo') {
+      setStudentError('Esta matrícula está inativa no sistema. Entre em contato com a administração do ateliê.');
+      return;
+    }
+
+    const inputPassword = studentPasswordInput.trim();
+    if (!inputPassword) {
       setStudentError('Por favor, informe sua senha de acesso ao portal.');
+      return;
+    }
+
+    // Always require and validate password against stored or generated standard password
+    const expectedPassword = foundStudent.password || generateStudentPassword(foundStudent.name);
+    if (inputPassword !== expectedPassword) {
+      setStudentError('Senha incorreta para este perfil de aluno. Em caso de dúvidas, consulte a administração do ateliê.');
       return;
     }
 

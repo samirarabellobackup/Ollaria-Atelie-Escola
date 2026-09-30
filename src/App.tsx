@@ -72,7 +72,11 @@ export default function App() {
   };
 
   const handleAdminLoginAttempt = (email: string, pass: string): boolean => {
-    if (email === 'ollariaatelie@gmail.com' && pass === 'admin2026') {
+    const creds = StorageService.getAdminCredentials();
+    if (
+      email.trim().toLowerCase() === creds.email.toLowerCase() &&
+      pass.trim() === creds.password.trim()
+    ) {
       setIsAuthModalOpen(false);
       setIs2FAModalOpen(true);
       return true;
@@ -98,6 +102,19 @@ export default function App() {
     setActiveStudentId(null);
     setIsAdmin2FAVerified(false);
   };
+
+  // Enforce session integrity
+  useEffect(() => {
+    if (currentRole === 'student' && activeStudentId && !students.some((s) => s.id === activeStudentId)) {
+      handleLogout();
+    }
+  }, [currentRole, activeStudentId, students]);
+
+  useEffect(() => {
+    if (currentRole === 'admin' && !isAdmin2FAVerified) {
+      setIs2FAModalOpen(true);
+    }
+  }, [currentRole, isAdmin2FAVerified]);
 
   const handleResetDemoData = () => {
     if (window.confirm('Tem certeza que deseja reiniciar os dados padrão do Ollaria Ateliê?')) {
@@ -183,7 +200,10 @@ export default function App() {
     setFirings((prev) => prev.filter((f) => f.id !== firingId));
   };
 
-  const activeStudentObject = students.find((s) => s.id === activeStudentId) || students[0];
+  const activeStudentObject =
+    currentRole === 'student' && activeStudentId
+      ? students.find((s) => s.id === activeStudentId) || null
+      : null;
 
   return (
     <div className="min-h-screen bg-stone-100 text-stone-900 font-sans flex flex-col antialiased selection:bg-amber-200 selection:text-amber-900">
@@ -202,7 +222,7 @@ export default function App() {
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         
         {/* LANDING / LOGGED OUT HERO CHOICE */}
-        {!currentRole ? (
+        {!currentRole || (currentRole === 'admin' && !isAdmin2FAVerified) || (currentRole === 'student' && !activeStudentObject) ? (
           <div className="py-6 sm:py-12 space-y-8">
             <div className="text-center max-w-3xl mx-auto space-y-3">
               <div className="inline-flex items-center space-x-2 bg-amber-200/80 text-amber-950 px-3 py-1 rounded-full text-xs font-bold border border-amber-300 shadow-sm">
@@ -292,7 +312,7 @@ export default function App() {
 
             </div>
           </div>
-        ) : currentRole === 'admin' ? (
+        ) : currentRole === 'admin' && isAdmin2FAVerified ? (
           /* ADMIN PORTAL INTERFACE */
           <div className="space-y-6">
             
@@ -414,7 +434,7 @@ export default function App() {
               />
             )}
           </div>
-        ) : (
+        ) : currentRole === 'student' && activeStudentObject ? (
           /* STUDENT PORTAL INTERFACE */
           <StudentPortal
             student={activeStudentObject}
@@ -423,7 +443,7 @@ export default function App() {
             announcements={announcements}
             rates={rates}
           />
-        )}
+        ) : null}
       </main>
 
       {/* MODALS */}
@@ -438,9 +458,14 @@ export default function App() {
 
       <TwoFactorModal
         isOpen={is2FAModalOpen}
-        adminEmail="ollariaatelie@gmail.com"
+        adminEmail={StorageService.getAdminCredentials().email}
         onVerifySuccess={handle2FAVerifiedSuccess}
-        onCancel={() => setIs2FAModalOpen(false)}
+        onCancel={() => {
+          setIs2FAModalOpen(false);
+          if (currentRole === 'admin' && !isAdmin2FAVerified) {
+            handleLogout();
+          }
+        }}
       />
 
       <AddStudentModal
